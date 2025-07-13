@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
+import jwt
+import datetime
 
 from .models import User
 
@@ -32,6 +34,20 @@ class LoginView(APIView):
         if not user.check_password(password):
             raise AuthenticationFailed('Incorrect password')
         
-        return Response({
-            'message': 'Login successful'
-        })
+        payload = {
+            'id': user.id,
+            'exp': datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.now(tz=datetime.timezone.utc)
+        }
+        
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        
+        response = Response()
+
+        response.set_cookie(key='jwt', value=token, httponly=True)
+
+        response.data = {
+            'jwt': token,
+        }
+
+        return response
