@@ -83,3 +83,30 @@ class LogoutView(APIView):
             'message': 'success'
         }
         return response
+    
+class ForgotView(APIView):
+    """
+    View to handle password reset requests.
+    """
+    def post(self, request):
+        email = request.data.get('email')
+        user = User.objects.filter(email=email).first()
+        
+        if not user:
+            raise AuthenticationFailed('User not found')
+        
+        # Logic to send reset link or code goes here
+        return Response({'message': 'Password reset link sent'})
+    
+class ResetView(APIView):
+    """
+    View to handle password reset.
+    """
+    def post(self, request):
+        token = request.data.get('token')
+        new_password = request.data.get('password')
+        
+        # Logic to verify token and reset password goes here
+        # For example, find user by token and set new password
+        
+        return Response({'message': 'Password has been reset'})
